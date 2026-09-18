@@ -7,7 +7,7 @@
 
 <a id="section-10_1"></a>
 
-### 10.1 Making your products and services inclusive
+### 10.1. Making your products and services inclusive
 
 10.1.a. Making your products and services inclusive means as many people as possible can use them, no matter who they are. This includes people who do not have traditional identity documents, such as passports, or who may find it difficult to prove their identity to access services online. However, there are reasons someone might be legitimately excluded. For example, for certain products and services that cannot be legally accessed until the age of 18, it is fair to restrict service access on account of someone’s age.
 
