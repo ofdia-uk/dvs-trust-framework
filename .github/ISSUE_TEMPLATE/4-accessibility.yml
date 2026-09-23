@@ -1,6 +1,6 @@
 name: "Accessibility problem"
 description: "Something is hard to read, navigate or use, including with assistive technology."
-labels: ["type: accessibility", "triage"]
+labels: ["accessibility", "triage"]
 body:
   - type: markdown
     attributes:

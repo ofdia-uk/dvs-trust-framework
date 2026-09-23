@@ -1,6 +1,6 @@
 name: "Broken link or navigation problem"
 description: "A link does not work or goes to the wrong place, or something is hard to find."
-labels: ["type: correction", "triage"]
+labels: ["correction", "triage"]
 body:
   - type: dropdown
     id: section

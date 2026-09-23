@@ -1,6 +1,6 @@
 name: "Other suggestion"
 description: "Anything else, such as an idea for guidance, examples or diagrams to help people use the trust framework."
-labels: ["type: suggestion", "triage"]
+labels: ["suggestion", "triage"]
 body:
   - type: dropdown
     id: section

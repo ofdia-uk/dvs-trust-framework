@@ -1,6 +1,6 @@
 name: "Policy feedback"
 description: "A rule does not work in practice, has unintended effects, or conflicts with something else."
-labels: ["type: proposed change", "triage"]
+labels: ["proposed change", "triage"]
 body:
   - type: markdown
     attributes:
