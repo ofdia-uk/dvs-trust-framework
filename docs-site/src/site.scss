@@ -1,0 +1,51 @@
+// Styles for the reading site.
+//
+// The site is not part of GOV.UK, so GOV.UK Frontend is configured without
+// the GDS Transport font (a system font is used instead) and without the
+// GOV.UK brand colour.
+
+@use "govuk-frontend/dist/govuk" as * with (
+  $govuk-font-family: (arial, sans-serif),
+  $govuk-functional-colours: (
+    brand: (name: "black"),
+  ),
+);
+
+// Figures in the text are raster images of fixed size.
+.app-prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Wide tables, such as the table of standards in section 15, scroll
+// horizontally rather than widening the page.
+.app-table-wrapper {
+  margin-bottom: govuk-spacing(6);
+  overflow-x: auto;
+
+  .govuk-table {
+    margin-bottom: 0;
+  }
+}
+
+.app-code {
+  font-family: monospace;
+}
+
+.app-contents-list {
+  margin-bottom: govuk-spacing(6);
+  padding-bottom: govuk-spacing(2);
+  border-bottom: 1px solid govuk-functional-colour(border);
+}
+
+.app-page-actions {
+  margin-top: govuk-spacing(8);
+  padding-top: govuk-spacing(4);
+  border-top: 2px solid govuk-functional-colour(brand);
+}
+
+// Abbreviations from section 16 show their meaning on hover.
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}

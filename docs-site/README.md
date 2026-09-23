@@ -1,105 +1,60 @@
-> [!IMPORTANT]
-> **Status: parked. Not deployed, and not in use.**
->
-> This workflow builds a live website from the draft content in this repo and is close to complete, but it is not published anywhere and
-> should not be. 
->
->The build workflow is set to manual trigger only, and GitHub Pages
-> is deliberately not enabled for this repository as of yet. 
->
->
->We are exploring this as a more accessible way to view the working draft.
+# Reading site
 
-# docs-site
+The source for the reading website: <https://ofdia-uk.github.io/dvs-trust-framework/>.
 
-The GOV.UK-styled static site for this repository. Built with [Eleventy (11ty)](https://www.11ty.dev/) and the official [govuk-frontend](https://github.com/alphagov/govuk-frontend) npm package, following the pattern used by the OfDIA data-schema-docs site for toolchain consistency.
+The site shows the working draft of the trust framework to people who would rather not use GitHub. It is for reading only. Feedback, review and history stay on GitHub, and every page links back there.
 
-> [!IMPORTANT]
-> The rendered site is a **view** of the repository. It is not the authoritative publication. The authoritative version of the UK digital verification services trust framework lives on GOV.UK. See [`../LICENCE.md`](../LICENCE.md) and the repository [`../README.md`](../README.md) for context.
+## How it works
 
-## Architecture
+The site has no copy of the text. [Eleventy](https://www.11ty.dev/) renders the Markdown files in `trust-framework-1.0/` and `CONTRIBUTING.md` directly from the repository. Rendering never changes the source files. [`lib/markdown.js`](lib/markdown.js) turns the GitHub-oriented Markdown into web pages:
 
-- The Markdown source lives at the repository root (`trust-framework-1.0/**`, top-level READMEs, `CONTRIBUTING.md` etc). This folder does not duplicate any of it.
-- Eleventy's input directory is `..` (the repo root), with `.eleventyignore` excluding build tooling.
-- Layouts, includes, data and the markdown-it `govspeak.js` plugin all live inside this folder.
-- The site builds into `_site/` (git-ignored).
+- It removes each file's caution banner and "Repository navigation" footer. Every page shows a "Draft" status banner instead.
+- It uses the first heading as the page title, and keeps the other headings in order without skipping levels.
+- It points links between Markdown files at the matching site pages. Links to other repository files go to GitHub.
+- It uses the abbreviation definitions kept in a hidden comment in section 16 to explain abbreviations on hover. It renders the bold row headings in the section 15 table as table row headers. Both match GOV.UK.
+- It applies GOV.UK Frontend styles.
 
-```
-docs-site/
-├── package.json              deps: eleventy, markdown-it, markdown-it-anchor, govuk-frontend
-├── .eleventy.js              config (permalinks, md links rewrite, passthrough copies)
-├── govspeak.js               markdown-it plugin: $CTA, $E, %…%, heading classes, table classes
-├── _layouts/
-│   ├── default.html          full GOV.UK page chrome
-│   └── page.html             adds a one-quarter TOC sidebar when headings exist
-├── _includes/
-│   ├── skip-link.html
-│   ├── govuk-header.html
-│   ├── service-navigation.html
-│   ├── phase-banner.html
-│   ├── page-title.html
-│   ├── page-footer.html      edit-on-GitHub + raise-an-issue links
-│   └── govuk-footer.html
-└── _data/
-    ├── site.json             OfDIA title, caption, phase banner text, repo URL
-    └── eleventyComputed.js   default layout + permalink scheme + title fallback
-```
+The Markdown is never processed by a template engine, so nothing in the policy text can be interpreted as code.
 
-## Local development
+## Branding
 
-```bash
+The site is not part of GOV.UK. Following the GOV.UK Design System rules for services on other domains, it uses [GOV.UK Frontend](https://frontend.design-system.service.gov.uk/) components with:
+
+- the Generic header, showing the OfDIA name instead of the GOV.UK logo;
+- no crown, GOV.UK favicons or GDS Transport font (it uses Arial);
+- black instead of the GOV.UK brand colour (set in [`src/site.scss`](src/site.scss)).
+
+## Build and publish
+
+The [Reading site workflow](../.github/workflows/site.yml) runs on every pull request and every change to `main`:
+
+- On a pull request it builds the site, tests the rendering and checks every page. The checks cover internal links and anchors, heading order, image alt text and the draft banner. Nothing is published.
+- On `main` it does the same and then publishes the site to GitHub Pages.
+
+Publishing needs GitHub Pages enabled for the repository, with **GitHub Actions** as the source (Settings, Pages).
+
+## Run it locally
+
+You need Node.js 24 (see [`.nvmrc`](.nvmrc)) and Python 3.
+
+```sh
 cd docs-site
-npm install
-npm start       # eleventy --serve, watches the repo, hot-reloads
+npm ci
+npm start          # build the stylesheet, then serve the site at http://localhost:8080/ and rebuild on changes
+npm test           # test the Markdown rendering
+npm run build      # build once into _site/
+python3 ../tools/check_site.py _site
 ```
 
-Open <http://localhost:8080/>.
+## Files
 
-To build once for inspection without the dev server:
-
-```bash
-npm run build   # outputs to docs-site/_site/
-```
-
-## Deployment
-
-The workflow at [`../.github/workflows/build-docs-site.yml`](../.github/workflows/build-docs-site.yml) builds the site on pushes to `main` and deploys to GitHub Pages using GitHub's native `actions/deploy-pages` action.
-
-Before first deploy, in the repository settings under **Pages**, set the source to **GitHub Actions**.
-
-### Subpath deployments
-
-`govuk-frontend`'s CSS references assets under `/assets/...` (an absolute path from the site root). Out of the box this works only for root-domain deployments (e.g. `dvs-trust-framework.ofdia.gov.uk`).
-
-For subpath deployments (e.g. `username.github.io/dvs-trust-framework/`), the build reads a `BASEURL` environment variable and rewrites `url(/assets/...)` to `url(${BASEURL}/assets/...)` in the vendored CSS before writing it to `_site/stylesheets/`. The CI workflow sets `BASEURL` automatically from `actions/configure-pages`'s `base_path` output, so the site works on GitHub Pages without additional configuration.
-
-For local development `BASEURL` defaults to an empty string — `npm start` serves the site from the root of `localhost:8080`, so no rewrite is needed.
-
-## Permalink scheme
-
-The computed permalink in [`_data/eleventyComputed.js`](_data/eleventyComputed.js) mirrors the repository layout:
-
-| Source file | URL |
+| Path | What it is |
 | --- | --- |
-| `README.md` | `/` |
-| `trust-framework-1.0/README.md` | `/trust-framework-1.0/` |
-| `trust-framework-1.0/part-1/README.md` | `/trust-framework-1.0/part-1/` |
-| `trust-framework-1.0/part-1/01-introduction.md` | `/trust-framework-1.0/part-1/01-introduction/` |
-| `CONTRIBUTING.md` | `/CONTRIBUTING/` |
-
-Cross-file `.md` links inside publication content are rewritten to these pretty URLs at output time by a transform in `.eleventy.js` — the source files keep their `.md`-style links so they still resolve correctly when browsed on github.com.
-
-## GovSpeak support
-
-[`govspeak.js`](govspeak.js) is a markdown-it plugin derived from the OfDIA data-schema-docs site. It understands a subset of the GOV.UK publishing system's block markup so that source prose can stay close to what OfDIA publishers would actually write:
-
-- `$CTA … $CTA` — call-to-action box
-- `$E … $E`, `$C … $C`, `$D … $D`, `$A … $A` — example, contact, download, address boxes
-- `^ help text ^` — help notice
-- `% warning text %` — GOV.UK warning text component
-
-It also applies govuk-body to paragraphs, govuk-heading-l/m/s to headings, govuk-inset-text to blockquotes, govuk-table scaffolding classes to tables, and govuk-link to in-content links. H1 in source content is downshifted to H2 so the layout's page title can remain the single H1 on the page.
-
-## GitHub Alerts
-
-The publication and supporting files use GitHub Alert syntax (`> [!CAUTION]`, `> [!IMPORTANT]`) which renders natively on github.com but not in plain markdown-it. The Eleventy config strips the `[!TAG]` label line before rendering, leaving the remaining blockquote content to render with the `govuk-inset-text` class. The visual effect is an inset notice, which is appropriate for both the caution banner and the important notice.
+| `eleventy.config.js` | Which files become pages, their addresses, and site-wide data |
+| `lib/markdown.js` | How the Markdown is rendered |
+| `_includes/layouts/` | Page templates: `base.njk` for every page, `page.njk` for pages rendered from Markdown |
+| `_data/site.js` | Site title, organisation and publication links, and part titles |
+| `pages/index.njk` | The home page |
+| `src/site.scss` | GOV.UK Frontend settings and the site's own styles |
+| `assets/init.js` | Starts GOV.UK Frontend's JavaScript |
+| `test/` | Tests for the Markdown rendering |

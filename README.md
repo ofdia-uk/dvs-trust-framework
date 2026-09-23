@@ -21,7 +21,7 @@ A change accepted here does not change government policy. Changes take effect on
 
 ## Read the trust framework
 
-The trust framework has 17 numbered sections in 4 parts. Start from the [contents page](trust-framework-1.0/README.md), or go straight to a section.
+The trust framework has 17 numbered sections in 4 parts. Start from the [contents page](trust-framework-1.0/README.md), or go straight to a section. You can also [read it on the website](https://ofdia-uk.github.io/dvs-trust-framework/), which is easier to read if you do not use GitHub.
 
 Rule numbers start with the number of their section. For example, rule 12.4.1.c is in section 12.
 

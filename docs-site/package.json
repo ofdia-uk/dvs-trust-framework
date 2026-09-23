@@ -1,20 +1,28 @@
 {
   "name": "dvs-trust-framework-site",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "GOV.UK-styled Eleventy site rendering the UK digital verification services trust framework workspace.",
-  "scripts": {
-    "start": "eleventy --serve",
-    "build": "eleventy",
-    "clean": "rm -rf _site"
-  },
+  "type": "module",
+  "description": "Reading website for the working draft of the UK digital verification services trust framework.",
   "license": "MIT",
-  "devDependencies": {
-    "@11ty/eleventy": "^3.0.0",
-    "markdown-it": "^14.1.0",
-    "markdown-it-anchor": "^9.2.0"
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "eleventy && npm run build:css",
+    "build:css": "sass --no-source-map --style=compressed --load-path=node_modules --quiet-deps src/site.scss _site/assets/site.css",
+    "start": "npm run build:css && eleventy --serve",
+    "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
-    "govuk-frontend": "^5.11.0"
+    "govuk-frontend": "^6.5.1",
+    "markdown-it-abbr": "^2.0.0",
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6",
+    "markdown-it": "^15.0.2",
+    "markdown-it-anchor": "^10.0.0",
+    "sass": "^1.105.0"
   }
 }

@@ -1,0 +1,79 @@
+name: Reading site
+
+# Builds the reading site from the Markdown in this repository.
+#
+# - On every pull request: build the site and check it. Nothing is published.
+# - On every change to main: build, check and publish it to GitHub Pages, so
+#   the live site always shows the accepted working draft.
+#
+# Publishing requires GitHub Pages to be enabled with "GitHub Actions" as its
+# source (Settings > Pages).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reading-site-${{ github.ref }}
+  # Let a publish to main finish; replace superseded pull request builds.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build and check the site
+    runs-on: ubuntu-latest
+    env:
+      # GitHub Pages serves a project site from /<repository name>/.
+      PATH_PREFIX: /${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: docs-site/.nvmrc
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: docs-site
+        run: npm ci
+
+      - name: Test the Markdown rendering
+        working-directory: docs-site
+        run: npm test
+
+      - name: Build the site
+        working-directory: docs-site
+        run: npm run build
+
+      - name: Check links, anchors, headings and the draft banner
+        run: python3 tools/check_site.py docs-site/_site --path-prefix "$PATH_PREFIX"
+
+      - name: Upload the site for publishing
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs-site/_site
+
+  publish:
+    name: Publish to GitHub Pages
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write # to publish the site
+      id-token: write # to verify the publish request came from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v5

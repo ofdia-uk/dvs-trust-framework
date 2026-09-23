@@ -1,0 +1,56 @@
+---
+permalink: /
+layout: layouts/base.njk
+---
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">{{ site.title }}</h1>
+    <p class="govuk-body-l">Read the working draft of the trust framework, maintained by the {{ site.organisation }} (OfDIA).</p>
+
+    <div class="govuk-inset-text">
+      This site shows the working draft. It is not the formally published version and may differ from it.
+      The <a class="govuk-link" href="{{ site.publishedUrl }}">published trust framework</a> is on GOV.UK.
+    </div>
+
+    <h2 class="govuk-heading-l">Read the trust framework</h2>
+    <p class="govuk-body">
+      The trust framework has 17 numbered sections in 4 parts. Rule numbers start with the number of their section:
+      for example, rule 12.4.1.c is in section 12.
+    </p>
+
+    {% for item in collections.sections %}{% if item.data.repoPath | partOf == null %}
+    <ul class="govuk-list">
+      <li><a class="govuk-link" href="{{ item.url }}">{{ item.data.title }}</a></li>
+    </ul>
+    {% endif %}{% endfor %}
+
+    {% for part in site.parts %}
+      <h3 class="govuk-heading-m">
+        <a class="govuk-link govuk-link--no-visited-state" href="/trust-framework-1.0/part-{{ part.number }}/">Part {{ part.number }}: {{ part.title }}</a>
+      </h3>
+      <ul class="govuk-list">
+        {% for item in collections.sections %}{% if (item.data.repoPath | partOf) == part.number %}
+          <li><a class="govuk-link" href="{{ item.url }}">{{ item.data.title }}</a></li>
+        {% endif %}{% endfor %}
+      </ul>
+    {% endfor %}
+
+    <h2 class="govuk-heading-l">Give feedback</h2>
+    <p class="govuk-body">
+      Anyone can give feedback on the working draft. You need a free GitHub account.
+      You do not need to suggest new wording.
+    </p>
+    <a class="govuk-button" href="{{ repositoryUrl }}/issues/new/choose">Give feedback on GitHub</a>
+    <p class="govuk-body"><a class="govuk-link" href="/feedback/">How to give feedback, and what happens next</a></p>
+
+    <h2 class="govuk-heading-l">See how the draft changes</h2>
+    <p class="govuk-body">
+      Changes are proposed and reviewed on GitHub before OfDIA accepts them. You can see exactly which words changed, and why.
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a class="govuk-link" href="{{ repositoryUrl }}/pulls">Proposed changes and their review</a></li>
+      <li><a class="govuk-link" href="{{ repositoryUrl }}/commits/main">History of accepted changes</a></li>
+      <li><a class="govuk-link" href="{{ repositoryUrl }}/compare/published-1.0...main">Changes since the published version</a></li>
+    </ul>
+  </div>
+</div>

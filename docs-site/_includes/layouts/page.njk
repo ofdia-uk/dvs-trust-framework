@@ -1,0 +1,74 @@
+{#
+  A page rendered from a Markdown file: a trust framework section, a contents
+  page, or the feedback guidance.
+#}
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{% set isFramework = repoPath.startsWith("trust-framework-1.0/") %}
+{% set part = repoPath | partOf %}
+{% set isContents = repoPath == "trust-framework-1.0/README.md" %}
+{% set isPartPage = repoPath.endsWith("/README.md") and not isContents %}
+
+{% block breadcrumbs %}
+  {% set crumbs = [{ text: "Home", href: "/" }] %}
+  {% if isFramework and not isContents %}
+    {% set crumbs = (crumbs.push({ text: "Contents", href: "/trust-framework-1.0/" }), crumbs) %}
+  {% endif %}
+  {% if part and not isPartPage %}
+    {% set crumbs = (crumbs.push({ text: "Part " + part, href: "/trust-framework-1.0/part-" + part + "/" }), crumbs) %}
+  {% endif %}
+  {{ govukBreadcrumbs({ items: crumbs, collapseOnMobile: true }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop app-prose">
+      {% if isFramework %}<span class="govuk-caption-l">Trust framework working draft</span>{% endif %}
+      <h1 class="govuk-heading-xl">{{ title }}</h1>
+
+      {% set headings = content | pageHeadings %}
+      {% if headings | length >= 3 %}
+        <nav class="app-contents-list" aria-labelledby="on-this-page">
+          <h2 class="govuk-heading-s" id="on-this-page">On this page</h2>
+          <ul class="govuk-list">
+            {% for heading in headings %}
+              <li><a class="govuk-link" href="#{{ heading.id }}">{{ heading.text }}</a></li>
+            {% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
+
+      {{ content | safe }}
+
+      {% if isFramework %}
+        <div class="app-page-actions">
+          <h2 class="govuk-heading-m">Give feedback on this page</h2>
+          <p class="govuk-body">
+            You can raise feedback on GitHub. You need a free GitHub account, and you do not need to suggest new wording.
+          </p>
+          <ul class="govuk-list">
+            <li><a class="govuk-link" href="{{ repositoryUrl }}/issues/new/choose">Give feedback on GitHub</a></li>
+            <li><a class="govuk-link" href="{{ repositoryUrl }}/commits/main/{{ repoPath }}">See the history of changes to this page</a></li>
+            <li><a class="govuk-link" href="{{ repositoryUrl }}/blob/main/{{ repoPath }}">View this page on GitHub</a></li>
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if isFramework and not isPartPage and not isContents %}
+    {% set sections = collections.sections %}
+    {% for item in sections %}
+      {% if item.url == page.url %}
+        {% set previousItem = sections[loop.index0 - 1] if loop.index0 > 0 else null %}
+        {% set nextItem = sections[loop.index0 + 1] if loop.index0 + 1 < sections | length else null %}
+        {{ govukPagination({
+          previous: { href: previousItem.url, labelText: previousItem.data.title } if previousItem else null,
+          next: { href: nextItem.url, labelText: nextItem.data.title } if nextItem else null
+        }) }}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endblock %}

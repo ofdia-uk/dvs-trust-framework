@@ -1,4 +1,4 @@
-# Keeps the GitHub Actions used by the workflows up to date.
+# Keeps the GitHub Actions and the reading site's dependencies up to date.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -7,4 +7,11 @@ updates:
       interval: monthly
     groups:
       github-actions:
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /docs-site
+    schedule:
+      interval: monthly
+    groups:
+      site-dependencies:
         patterns: ["*"]
