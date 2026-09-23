@@ -1,6 +1,6 @@
 name: "Correction"
 description: "A typo, a formatting problem, or a factual error such as an out-of-date reference."
-labels: ["correction", "triage"]
+labels: ["type: correction", "triage"]
 body:
   - type: markdown
     attributes:

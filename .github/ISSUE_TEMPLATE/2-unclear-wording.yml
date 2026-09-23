@@ -1,6 +1,6 @@
 name: "Unclear wording"
 description: "You are not sure what something means, or it could be read in more than one way."
-labels: ["clarity", "triage"]
+labels: ["type: clarification", "triage"]
 body:
   - type: markdown
     attributes:
