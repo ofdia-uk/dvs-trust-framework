@@ -253,6 +253,44 @@
 
 - the value of that data/information to your business or to a bad actor.
 
+11.6.1.e. **User access management.** Your organisation must manage user access throughout its lifecycle to ensure that access is authorised, appropriate to the user's role, regularly reviewed, and removed when no longer required. These must be based on business need.
+
+Evidence may include:
+
+- processes for provisioning and approving user access;
+
+- role-based access controls and least-privilege principles;
+
+- periodic reviews of user permissions; and
+
+- procedures for revoking access following role changes or departure.
+
+11.6.1.f. **Privileged access management.** Your organisation must implement additional controls for privileged access to systems and services to ensure such access is restricted, attributable to an individual, and subject to monitoring.
+
+Evidence may include:
+
+- controls governing the allocation and use of privileged accounts;
+
+- logging and monitoring of privileged activities;
+
+- measures to ensure privileged actions can be attributed to an individual user; and
+
+- processes for reviewing privileged access rights.
+
+11.6.1.g. **Access control assurance.** Your information security management system must include access controls proportionate to the sensitivity of the service and identity data handled. You must control the creation, approval, use, review and removal of access, including privileged access, and demonstrate that these controls are implemented and operating effectively.
+
+The organisation must maintain records sufficient to demonstrate that access control processes are operating effectively and in accordance with organisational policy.
+
+Evidence may include:
+
+- access request and approval records;
+
+- user access registers;
+
+- audit logs and change records; and
+
+- records of periodic access reviews and remedial actions taken.
+
 <a id="section-11_6_2"></a>
 
 #### 11.6.2. Integrity
