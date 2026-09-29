@@ -69,17 +69,19 @@
 
 - demonstrate that you have processes in place to appoint a new SRO if needed.
 
-11.3.d. Your SRO must inform OfDIA and your CAB of any material changes to your organisation or service within 48 hours of those changes happening. This includes ceasing to provide the certified service or changes to:
+11.3.d. Your SRO must inform OfDIA and your CAB of any material changes to your organisation or service within 48 hours of those changes happening. This includes ceasing to provide the certified service. A change is material if it affects:
 
-- your service’s technology;
+- the scope, functionality, technology, or delivery of your certified service;
 
-- your directors, or equivalent;
+- the ownership, control, or governance of your organisation, including directors, ultimate beneficial owners, and people with significant control, or equivalent;
 
-- ultimate beneficial owners, or equivalent;
+- your security posture, including changes to critical suppliers, outsourced services, or other elements of your supply chain;
 
-- people with significant control, or equivalent; and
+- your compliance with or ability to meet the rules in this framework; or
 
-- any information covered by the business probity rules in [section 11.1](#section-11_1).
+- the basis on which certification was granted.
+
+Where there is uncertainty about whether a change is material, you should report it.
 
 <a id="section-11_4"></a>
 
