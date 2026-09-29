@@ -305,7 +305,9 @@
 
 #### 11.6.4. Technical and security controls
 
-11.6.4.a. You must have a document that explains what hardware and software you use to protect information, such as firewalls, intrusion detection systems and encryption techniques. It must also explain what software you use to monitor and control access to information.
+11.6.4.a. Your organisation must document the hardware controls used to protect information such as firewalls, intrusion detection systems and encryption techniques. You must also document what software you use to monitor and control access to information.
+
+Your organisation must also demonstrate, through current and relevant evidence, that these controls are deployed, appropriately configured, monitored and operating effectively.
 
 11.6.4.b. You could follow [NCSC guidance on Secure Design Principles](https://www.ncsc.gov.uk/collection/cyber-security-design-principles) and the [NCSC CAF](https://www.ncsc.gov.uk/collection/caf).
 
