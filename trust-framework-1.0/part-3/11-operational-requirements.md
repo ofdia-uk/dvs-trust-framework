@@ -47,15 +47,18 @@
 
 ### 11.3. Staff and resources
 
-11.3.a. You must demonstrate that you have ways to:
+11.3.a. You must demonstrate that you:
 
 - make sure your staff (including contractors) have the right experience, training (such as data protection training), competencies and qualifications needed to do their job;
 
 - do background checks on your staff; and
 
-- make sure any personal, cryptographic or sensitive information you keep can only be accessed by authorised staff.
+- make sure staff with access to personal, cryptographic, sensitive, or security-relevant systems and information are vetted before appointment and trained on appointment and at regular intervals. As a minimum, you must evidence:
+  - the checks carried out;
+  - training completed and its refresh cycle; and
+  - records for both.
 
-11.3.b. You could evidence this by:
+11.3.b. You may use the following standards to support this evidence; other approaches must show equivalent outcomes:
 
 - following the ‘applicable skills and security awareness’ control in [ISO/IEC 27001](https://www.iso.org/isoiec-27001-information-security.html);
 
