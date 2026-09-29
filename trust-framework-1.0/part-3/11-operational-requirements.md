@@ -343,11 +343,19 @@
 
 - make a security plan based on security risks you have identified;
 
-- have a process for investigating and responding to security risks;
+- have a process for investigating and responding to security risks; and
 
-- report security risks in a way that is proportionate to your organisation and product or service; and
+- report security risks in a way that is proportionate to your organisation and product or service.
 
-- have a robust assurance and review process.
+Your organisation must operate an assurance and review process that, as a minimum:
+
+- runs at least every [12] months;
+
+- has a named owner;
+
+- checks that your security measures are in place and working; and
+
+- records findings and tracks fixes to successful completion.
 
 <a id="section-11_6_8"></a>
 
