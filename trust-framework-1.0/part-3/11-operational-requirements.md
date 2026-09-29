@@ -367,11 +367,23 @@
 
 - use security measures that ensure confidentiality, integrity and availability;
 
-- test your security measures regularly, using the same tests each time, and improve them whenever you can;
-
 - can quickly restore access to personal data if there is a physical or technical incident; and
 
 - know how you will inform people if there is a security breach, so they can protect themselves from potential identity theft.
+
+Your organisation must safeguard your systems against current and emerging attack techniques. As a minimum, you must:
+
+- test security measures through a documented and repeatable programme;
+
+- test your security measures at least every [X] months and after any significant change to your service;
+
+- make sure each round of testing reflects current and emerging threats from the threat intelligence you collect (see 12.4.4);
+
+- update the scope of tests at each cycle to reflect material changes to threats, systems and services; and
+
+- record test results, the fixes made, and who owns them.
+
+Recognised testing approaches (for example, penetration testing) may be used as evidence.
 
 11.6.8.c. You must also show how you meet these rules in your ongoing internal audits.
 
