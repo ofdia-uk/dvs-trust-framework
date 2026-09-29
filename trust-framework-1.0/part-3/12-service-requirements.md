@@ -121,7 +121,15 @@
 
 12.3.f. Data on any type of media must be protected from theft.
 
-12.3.g. You must protect your networks from typical hacking activities, such as sniffing data packets across the network. You must also have a robust process to monitor network activity.
+12.3.g. You must protect your networks from typical hacking activities, such as sniffing data packets across the network. Your organisation must monitor network activity to detect unauthorised or unusual behaviour. As a minimum:
+
+- you must monitor network activity across all systems that are used to deliver your service;
+
+- you must define alert-review and escalation arrangements, namely define timescales and named owners, and assign accountable roles;
+
+- you must retain monitoring records for [x] months; and
+
+- where monitoring identifies anomalous or suspicious activity, you must have a recorded process for identifying the vulnerability or control weakness that enabled it and taking proportionate remedial action.
 
 <a id="section-12_3_1"></a>
 
