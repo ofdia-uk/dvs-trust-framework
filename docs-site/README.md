@@ -139,6 +139,7 @@ The "What's changed" page (`/changes/`) tells readers whether the trust framewor
   - **link changes:** the link's old and new destination;
   - **formatting changes:** marked as formatting, with the wording and links the same.
 - The changed section's own page links to its changes. Unchanged pages say nothing.
+- Under a change, a "Why this changed" note gives the reasons a maintainer has recorded in [`change-provenance.json`](../change-provenance.json): an approved explanation, and links to the issues and pull requests on GitHub. An entry about a whole section is shown under the page summary. Nothing is shown for a change with no entry, and nothing is taken from GitHub. [`lib/change-provenance.js`](lib/change-provenance.js) matches entries to changed blocks by rule identity: by the rule's number now, and by its number in the baseline when exactly one rule has had that number in that file, so it never guesses. The note is [`_includes/components/change-provenance.njk`](_includes/components/change-provenance.njk). [ARCHITECTURE.md](../ARCHITECTURE.md#why-a-change-was-made) explains how maintainers record it.
 - A file is "moved" only when it looks exactly the same in its new place.
 
 The build needs the baseline tag and the full Git history. In CI, if either is missing, the build fails rather than saying nothing has changed. A local build without them says the information is not available. The tests check the comparison against small example repositories, and the site check confirms that what the page says is consistent.
@@ -159,7 +160,7 @@ The site is not part of GOV.UK. Following the GOV.UK Design System rules for ser
 
 The [Reading site workflow](../.github/workflows/site.yml) runs on every pull request and every change to `main`:
 
-- On a pull request it checks the rule identities, builds the site, tests the rendering and checks every page. The checks cover internal links, form addresses and anchors, unique IDs, heading order, image alt text, the draft banner, an anchor and feedback route for every numbered rule, a permanent link page for every rule identity that goes to the right rule, a consistent "What's changed" page, a search index whose every entry links to an anchor that exists, a search page that offers another way to find a rule until search has started, a site navigation that marks the current page with `aria-current="page"`, existing feedback links that go to the right place with the right count, and a "Back to top" link on every page that works without JavaScript. Nothing is published.
+- On a pull request it checks the rule identities, builds the site, tests the rendering and checks every page. The checks cover internal links, form addresses and anchors, unique IDs, heading order, image alt text, the draft banner, an anchor and feedback route for every numbered rule, a permanent link page for every rule identity that goes to the right rule, a consistent "What's changed" page, a search index whose every entry links to an anchor that exists, a search page that offers another way to find a rule until search has started, a site navigation that marks the current page with `aria-current="page"`, existing feedback links that go to the right place with the right count, "Why this changed" notes that show exactly what `change-provenance.json` records, and a "Back to top" link on every page that works without JavaScript. Nothing is published.
 - On `main` it does the same and then publishes the site to GitHub Pages.
 
 Publishing needs GitHub Pages enabled for the repository, with **GitHub Actions** as the source (Settings, Pages).
@@ -174,6 +175,7 @@ npm ci
 npm start          # build the stylesheet, then serve the site at http://localhost:8080/ and rebuild on changes
 npm run rules      # check that every rule has its permanent identity (see ARCHITECTURE.md)
 npm run feedback   # check existing-feedback.json; npm run feedback -- show/remove changes it (see ARCHITECTURE.md)
+npm run provenance # check change-provenance.json; npm run provenance -- record/remove changes it (see ARCHITECTURE.md)
 npm test           # test the Markdown rendering
 npm run build      # build once into _site/
 python3 ../tools/check_site.py _site
@@ -191,6 +193,8 @@ python3 ../tools/check_site.py _site
 | `lib/existing-feedback.js` | The existing feedback chosen for the site: checking `existing-feedback.json`, and which rules and sections it is about |
 | `scripts/existing-feedback.js` | `npm run feedback`: check `existing-feedback.json`, and show or remove an issue |
 | `scripts/existing-feedback-action.js` | Turns the form of the "Show existing feedback" workflow into one `npm run feedback` command |
+| `lib/change-provenance.js` | Why changes were made: checking `change-provenance.json`, and which changed blocks each entry explains |
+| `scripts/change-provenance.js` | `npm run provenance`: check `change-provenance.json`, and record or remove an entry |
 | `scripts/rule-identities.js` | `npm run rules`: check and maintain `rule-identities.json` |
 | `scripts/rule-identities-summary.js` | When the rule identity check fails in the Reading site workflow, writes the job summary: how to record the decision in GitHub or locally, then the check's output |
 | `scripts/rule-identities-action.js` | Turns the form of the "Maintain rule identities" workflow into one `npm run rules` command, so maintainers can do the same in the browser |
@@ -200,6 +204,7 @@ python3 ../tools/check_site.py _site
 | `_data/site.js` | Site title, organisation and publication links, and part titles |
 | `pages/index.njk` | The home page |
 | `pages/changes.njk`, `pages/changes-section.njk` | The "What's changed" page, and a page for each changed section |
+| `_includes/components/change-provenance.njk` | The "Why this changed" note on a changed section's page |
 | `pages/search.njk`, `pages/search-index.njk` | The search page, and the search index it loads |
 | `pages/rule-identity.njk` | The permanent link page for each rule (`/rules/r0254/`) |
 | `pages/existing-feedback.njk`, `_includes/components/existing-feedback-list.njk` | The existing feedback page (`/existing-feedback/`), and its list |

@@ -530,5 +530,122 @@ class ExistingFeedbackChecks(unittest.TestCase):
         self.assertTrue(any("other.md is listed with no feedback" in p for p in problems))
 
 
+REPOSITORY = "https://github.com/example/repo"
+
+
+def why(*entries: str, level: int = 3, heading: str = "Why this changed") -> str:
+    """A "Why this changed" note, as docs-site/_includes/components/change-provenance.njk writes it."""
+    return f'<div class="app-why" data-provenance><h{level} class="govuk-heading-s app-why__heading">{heading}</h{level}>{"".join(entries)}</div>'
+
+
+def why_entry(identity: str, rationale: str | None = None, issues: tuple[int, ...] = (), pulls: tuple[int, ...] = (), issue_link: str | None = None, pull_link: str | None = None) -> str:
+    parts = []
+    if rationale is not None:
+        parts.append(f'<p class="govuk-body-s app-why__rationale" data-provenance-rationale>{rationale}</p>')
+    if issues:
+        links = " and ".join(f'<a class="govuk-link" href="{issue_link or REPOSITORY + "/issues/" + str(n)}" data-provenance-issue="{n}">issue #{n}</a>' for n in issues)
+        parts.append(f'<p class="govuk-body-s app-why__source">Raised in {links} on GitHub.</p>')
+    if pulls:
+        links = " and ".join(f'<a class="govuk-link" href="{pull_link or REPOSITORY + "/pull/" + str(n)}" data-provenance-pull="{n}">pull request #{n}</a>' for n in pulls)
+        parts.append(f'<p class="govuk-body-s app-why__source">Reviewed and accepted in {links} on GitHub.</p>')
+    return f'<div class="app-why__entry" data-provenance-entry="{identity}">{"".join(parts)}</div>'
+
+
+def change_page(*notes: str) -> str:
+    """A section's "What's changed" page with a change, each note under it."""
+    return "".join(f'<div class="app-change"><h2>12.1.a <strong>Changed</strong></h2><p>The wording.</p>{note}</div>' for note in notes)
+
+
+class ProvenanceChecks(unittest.TestCase):
+    """The "Why this changed" notes on the "What's changed" pages, compared with change-provenance.json."""
+
+    def setUp(self):
+        SiteChecks.setUp(self)
+        (self.site / "index.html").write_text(page(""), encoding="utf-8")
+        (self.site / "changes" / "12-section").mkdir()
+        self.repository = Path(tempfile.mkdtemp())
+        (self.repository / "framework-baseline.json").write_text(json.dumps({"tag": "published-1.0", "name": "published 1.0"}), encoding="utf-8")
+        self.register([])
+
+    def register(self, entries: list[dict]) -> None:
+        (self.repository / "change-provenance.json").write_text(json.dumps({"changes": entries}), encoding="utf-8")
+
+    def problems(self, body: str, path: str = "changes/12-section/index.html", prefix: str = "/") -> list[str]:
+        (self.site / path).write_text(page(body), encoding="utf-8")
+        return cs.check(self.site, prefix, None, self.repository / "change-provenance.json")
+
+    ENTRY = {"id": "c0001", "baseline": "published-1.0", "rules": ["r0001"], "issues": [123, 130], "pullRequests": [147], "rationale": "Covers data in transit."}
+
+    def test_nothing_recorded_and_nothing_shown_passes(self):
+        self.assertEqual(self.problems(change_page("")), [])
+
+    def test_an_entry_shown_as_recorded_passes_with_or_without_a_path_prefix(self):
+        self.register([self.ENTRY, {"id": "c0002", "baseline": "published-0.9", "rules": ["r0002"], "pullRequests": [5]}])
+        note = why(why_entry("c0001", "Covers data in transit.", (123, 130), (147,)))
+        self.assertEqual(self.problems(change_page(note)), [])
+        self.assertEqual(self.problems(change_page(note), prefix="/dvs-trust-framework/"), [])
+
+    def test_an_entry_for_the_section_as_a_whole_passes(self):
+        self.register([{"id": "c0001", "baseline": "published-1.0", "sections": ["trust-framework-1.0/part-3/12-section.md"], "pullRequests": [9]}])
+        self.assertEqual(self.problems(why(why_entry("c0001", pulls=(9,)), level=2, heading="Why this section changed")), [])
+
+    def test_notes_belong_only_on_a_sections_change_page(self):
+        self.register([self.ENTRY])
+        note = why(why_entry("c0001", "Covers data in transit.", (123, 130), (147,)))
+        (self.site / "changes" / "12-section" / "index.html").write_text(page(change_page(note)), encoding="utf-8")
+        for path in ("index.html", "changes/index.html", "section/index.html"):
+            problems = self.problems(UNCHANGED + note if path == "changes/index.html" else note, path)
+            self.assertTrue(any(p.startswith(f'{path}: has a "Why this changed" note') for p in problems), (path, problems))
+
+    def test_links_go_to_that_issue_or_pull_request_on_github_and_say_which(self):
+        self.register([self.ENTRY])
+        for entry, message in [
+            (why_entry("c0001", "Covers data in transit.", (123, 130), (147,), issue_link=f"{REPOSITORY}/issues/999"), "links issue 123 to"),
+            (why_entry("c0001", "Covers data in transit.", (123, 130), (147,), pull_link=f"{REPOSITORY}/issues/147"), "links pull request 147 to"),
+            (why_entry("c0001", "Covers data in transit.", (123, 130), (147,), issue_link="https://example.org/issues/123"), "which is not that issue on GitHub"),
+            (why_entry("c0001", "Covers data in transit.", (123, 130), (147,)).replace("issue #123", "#123"), "should say 'issue #123', not '#123'"),
+        ]:
+            problems = self.problems(change_page(why(entry)))
+            self.assertTrue(any(message in p for p in problems), (message, problems))
+
+    def test_every_entry_for_the_current_baseline_is_shown(self):
+        self.register([self.ENTRY])
+        self.assertIn(
+            "change-provenance.json: entry c0001 explains a change since published-1.0, but no \"What's changed\" page shows it",
+            self.problems(change_page("")),
+        )
+
+    def test_only_entries_for_the_current_baseline_are_shown(self):
+        self.register([dict(self.ENTRY, baseline="published-0.9")])
+        problems = self.problems(change_page(why(why_entry("c0001", "Covers data in transit.", (123, 130), (147,)))))
+        self.assertTrue(any("has no entry c0001 for the current baseline (published-1.0)" in p for p in problems))
+
+    def test_an_entry_shows_exactly_its_explanation_issues_and_pull_requests(self):
+        self.register([self.ENTRY])
+        for entry, label in [
+            (why_entry("c0001", "Covers data at rest.", (123, 130), (147,)), "explanation"),
+            (why_entry("c0001", None, (123, 130), (147,)), "explanation"),
+            (why_entry("c0001", "Covers data in transit.", (123,), (147,)), "issues"),
+            (why_entry("c0001", "Covers data in transit.", (130, 123), (147,)), "issues"),
+            (why_entry("c0001", "Covers data in transit.", (123, 130), ()), "pull requests"),
+        ]:
+            problems = self.problems(change_page(why(entry)))
+            self.assertTrue(any(f"entry c0001 shows the {label}" in p for p in problems), (label, problems))
+
+    def test_an_explanation_is_shown_as_text(self):
+        rationale = '<b>Bold</b> & "quoted"'
+        self.register([dict(self.ENTRY, rationale=rationale)])
+        escaped = "&lt;b&gt;Bold&lt;/b&gt; &amp; &quot;quoted&quot;"
+        self.assertEqual(self.problems(change_page(why(why_entry("c0001", escaped, (123, 130), (147,))))), [])
+        for wrong in (rationale, escaped.replace("&amp;", "&amp;amp;")):
+            problems = self.problems(change_page(why(why_entry("c0001", wrong, (123, 130), (147,)))))
+            self.assertTrue(any("entry c0001 shows the explanation" in p for p in problems), (wrong, problems))
+
+    def test_entries_need_an_id_and_something_to_say(self):
+        problems = self.problems(change_page(why(why_entry("1"))))
+        self.assertTrue(any("has the id '1', not one like c0001" in p for p in problems))
+        self.assertTrue(any("entry 1 says nothing about why the change was made" in p for p in problems))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -49,6 +49,14 @@ rule and section listed on the page is linked to from the site; and every
 issue link goes to that issue on GitHub. With nothing listed, no rule or
 section links there.
 
+It checks why changes were made, where maintainers have recorded it
+(docs-site/lib/change-provenance.js): a "Why this changed" note appears only
+on a section's "What's changed" page (changes/<slug>/); each issue and pull
+request link goes to that issue or pull request on GitHub and says which it
+is; and, compared with change-provenance.json, every entry for the current
+baseline is shown somewhere, nothing else is, and each shows exactly its
+explanation, issues and pull requests, as text.
+
 It also checks the search index (search-index.json): every passage in it
 links to a page and anchor that exist, page addresses are relative to the
 site root (so they work under a path prefix), rule and section numbers are
@@ -64,7 +72,10 @@ External links are not checked.
 Pass --path-prefix if the site was built for a sub-path, for example
 --path-prefix /dvs-trust-framework/ for a GitHub Pages project site.
 Pass --rule-identities to compare the permanent pages with a registry other
-than the repository's rule-identities.json.
+than the repository's rule-identities.json, and --change-provenance to compare
+the "Why this changed" notes with a register other than the repository's
+change-provenance.json (the baseline is read from the framework-baseline.json
+next to it).
 """
 
 from __future__ import annotations
@@ -80,8 +91,12 @@ from urllib.parse import parse_qs, unquote, urlsplit
 
 EXTERNAL_SCHEMES = {"http", "https", "mailto", "tel"}
 REGISTRY = Path(__file__).resolve().parent.parent / "rule-identities.json"
+PROVENANCE = Path(__file__).resolve().parent.parent / "change-provenance.json"
 IDENTITY = re.compile(r"^r\d{4,}$")
+CHANGE_ID = re.compile(r"^c\d{4,}$")
 ISSUE_LINK = re.compile(r"^https://github\.com/[^/]+/[^/]+/issues/(\d+)$")
+PULL_LINK = re.compile(r"^https://github\.com/[^/]+/[^/]+/pull/(\d+)$")
+CHANGE_PAGE = re.compile(r"^changes/[^/]+/index\.html$")
 
 
 class Page(HTMLParser):
@@ -138,6 +153,13 @@ class Page(HTMLParser):
         # rule) and the issues in each group.
         self.section_feedback_links: list[tuple[str, str]] = []
         self.feedback_sections: list[dict] = []
+        # Why changes were made: the number of "Why this changed" notes, and
+        # each entry in them, with its explanation and its issue and pull
+        # request links ({"number", "href", "text"}).
+        self.provenance_notes = 0
+        self.provenance: list[dict] = []
+        self._in_rationale = False
+        self._provenance_link: dict | None = None
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -177,6 +199,18 @@ class Page(HTMLParser):
             self.feedback_sections[-1]["groups"].append({"kind": a["data-feedback-group"], "rule": a.get("data-feedback-rule") or "", "id": a.get("id") or "", "issues": []})
         if tag == "a" and "data-feedback-issue" in a and self.feedback_sections and self.feedback_sections[-1]["groups"]:
             self.feedback_sections[-1]["groups"][-1]["issues"].append((a["data-feedback-issue"], a.get("href") or ""))
+        if "data-provenance" in a:
+            self.provenance_notes += 1
+        if "data-provenance-entry" in a:
+            self.provenance.append({"id": a["data-provenance-entry"] or "", "rationale": None, "issues": [], "pulls": []})
+        if "data-provenance-rationale" in a and self.provenance:
+            self.provenance[-1]["rationale"] = ""
+            self._in_rationale = True
+        if tag == "a" and self.provenance and ("data-provenance-issue" in a or "data-provenance-pull" in a):
+            kind = "issues" if "data-provenance-issue" in a else "pulls"
+            number = a.get("data-provenance-issue") if kind == "issues" else a.get("data-provenance-pull")
+            self.provenance[-1][kind].append({"number": number or "", "href": a.get("href") or "", "text": ""})
+            self._provenance_link = self.provenance[-1][kind][-1]
         if a.get("data-rule-identity"):
             self.identity = a["data-rule-identity"]
             self.identity_status = a.get("data-rule-status")
@@ -225,6 +259,9 @@ class Page(HTMLParser):
             self._in_nav_list = False
         if tag == "a":
             self._in_back_to_top = False
+            self._provenance_link = None
+        if tag == "p":
+            self._in_rationale = False
         if tag == "div":
             if self._fallback_depth == self._div_depth:
                 self._fallback_depth = None
@@ -236,6 +273,10 @@ class Page(HTMLParser):
         self.text.append(data)
         if self._in_back_to_top:
             self.back_to_top[-1]["text"] += data
+        if self._in_rationale:
+            self.provenance[-1]["rationale"] += data
+        if self._provenance_link is not None:
+            self._provenance_link["text"] += data
 
     def handle_comment(self, data):
         self.text.append(f"<!--{data}-->")
@@ -462,6 +503,66 @@ def existing_feedback_problems(pages: dict[Path, Page], site: Path, prefix: str)
     return problems
 
 
+def read_provenance(path: Path | None) -> tuple[list[dict], str | None] | None:
+    """The entries in change-provenance.json for the current baseline, and that baseline, or None if not given."""
+    if path is None:
+        return None
+    entries = json.loads(path.read_text(encoding="utf-8")).get("changes", [])
+    baseline_file = path.parent / "framework-baseline.json"
+    baseline = json.loads(baseline_file.read_text(encoding="utf-8")).get("tag") if baseline_file.exists() else None
+    return [entry for entry in entries if entry.get("baseline") == baseline], baseline
+
+
+def provenance_problems(pages: dict[Path, Page], site: Path, register: tuple[list[dict], str | None] | None) -> list[str]:
+    """Problems with the "Why this changed" notes on the "What's changed" pages."""
+    problems: list[str] = []
+    rendered: dict[str, list[tuple[str, dict]]] = {}
+    for path, page in sorted(pages.items()):
+        rel = path.relative_to(site).as_posix()
+        if not page.provenance_notes and not page.provenance:
+            continue
+        if not CHANGE_PAGE.match(rel):
+            problems.append(f"{rel}: has a \"Why this changed\" note, but those belong only on a section's \"What's changed\" page (changes/<section>/)")
+            continue
+        for entry in page.provenance:
+            name = entry["id"]
+            if not CHANGE_ID.match(name):
+                problems.append(f"{rel}: a \"Why this changed\" entry has the id {name!r}, not one like c0001")
+            if entry["rationale"] is None and not entry["issues"] and not entry["pulls"]:
+                problems.append(f"{rel}: entry {name} says nothing about why the change was made")
+            for kind, pattern, noun in (("issues", ISSUE_LINK, "issue"), ("pulls", PULL_LINK, "pull request")):
+                for link in entry[kind]:
+                    match = pattern.match(link["href"])
+                    if not match or match.group(1) != link["number"]:
+                        problems.append(f"{rel}: entry {name} links {noun} {link['number']} to {link['href']!r}, which is not that {noun} on GitHub")
+                    want = f"{noun} #{link['number']}"
+                    if " ".join(link["text"].split()) != want:
+                        problems.append(f"{rel}: entry {name}'s link to {noun} {link['number']} should say {want!r}, not {link['text'].strip()!r}")
+            rendered.setdefault(name, []).append((rel, entry))
+    if register is None:
+        return problems
+    entries, baseline = register
+    expected = {entry.get("id"): entry for entry in entries}
+    for name, places in sorted(rendered.items()):
+        entry = expected.get(name)
+        if entry is None:
+            problems.append(f"{places[0][0]}: shows entry {name}, but change-provenance.json has no entry {name} for the current baseline ({baseline})")
+            continue
+        want = {
+            "rationale": entry["rationale"].strip() if isinstance(entry.get("rationale"), str) else None,
+            "issues": [str(number) for number in entry.get("issues", [])],
+            "pulls": [str(number) for number in entry.get("pullRequests", [])],
+        }
+        for rel, shown in places:
+            got = {"rationale": shown["rationale"], "issues": [link["number"] for link in shown["issues"]], "pulls": [link["number"] for link in shown["pulls"]]}
+            for key, label in (("rationale", "explanation"), ("issues", "issues"), ("pulls", "pull requests")):
+                if got[key] != want[key]:
+                    problems.append(f"{rel}: entry {name} shows the {label} {got[key]!r}, but change-provenance.json gives {want[key]!r}")
+    for name in sorted(set(expected) - set(rendered)):
+        problems.append(f"change-provenance.json: entry {name} explains a change since {baseline}, but no \"What's changed\" page shows it")
+    return problems
+
+
 def change_problems(pages: dict[Path, Page], site: Path) -> list[str]:
     """Problems with what the site says about changes to the trust framework."""
     reporting = [(path, page) for path, page in pages.items() if page.framework_status]
@@ -575,7 +676,7 @@ def search_page_problems(pages: dict[Path, Page], site: Path) -> list[str]:
     return problems
 
 
-def check(site: Path, prefix: str, registry_path: Path | None = None) -> list[str]:
+def check(site: Path, prefix: str, registry_path: Path | None = None, provenance_path: Path | None = None) -> list[str]:
     problems: list[str] = []
     pages = {p.resolve(): parse(p) for p in site.rglob("*.html")}
     if not pages:
@@ -617,6 +718,7 @@ def check(site: Path, prefix: str, registry_path: Path | None = None) -> list[st
     problems.extend(change_problems(pages, site))
     problems.extend(identity_problems(pages, site.resolve(), prefix, read_registry(registry_path)))
     problems.extend(existing_feedback_problems(pages, site.resolve(), prefix))
+    problems.extend(provenance_problems(pages, site.resolve(), read_provenance(provenance_path)))
     problems.extend(search_problems(pages, site.resolve()))
     problems.extend(search_page_problems(pages, site.resolve()))
     return problems
@@ -627,9 +729,10 @@ def main() -> int:
     parser.add_argument("site", type=Path, help="the built site directory, for example docs-site/_site")
     parser.add_argument("--path-prefix", default="/", help="URL prefix the site was built for (default: /)")
     parser.add_argument("--rule-identities", type=Path, default=REGISTRY, help="the rule identity registry (default: rule-identities.json)")
+    parser.add_argument("--change-provenance", type=Path, default=PROVENANCE, help="the register of why changes were made (default: change-provenance.json)")
     args = parser.parse_args()
     prefix = args.path_prefix if args.path_prefix.endswith("/") else args.path_prefix + "/"
-    problems = check(args.site, prefix, args.rule_identities)
+    problems = check(args.site, prefix, args.rule_identities, args.change_provenance)
     for problem in problems:
         if os.environ.get("GITHUB_ACTIONS") == "true":
             print(f"::error::{problem}")
@@ -639,7 +742,7 @@ def main() -> int:
     if problems:
         print(f"\n{len(problems)} problem(s) found in {pages} pages.")
         return 1
-    print(f"{pages} pages checked: links, anchors, IDs, headings, images, status banner, rule feedback, permanent rule links, existing feedback links, the change status, the search index, the search fallback, the navigation and the Back to top link are all in order.")
+    print(f"{pages} pages checked: links, anchors, IDs, headings, images, status banner, rule feedback, permanent rule links, existing feedback links, the change status, why changes were made, the search index, the search fallback, the navigation and the Back to top link are all in order.")
     return 0
 
 

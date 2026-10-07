@@ -1,0 +1,32 @@
+{#
+  Why a change was made: shown on a "What's changed" page under a change, or
+  under the summary for the section as a whole, but only where a maintainer
+  has recorded it in change-provenance.json. Nothing is shown for an empty
+  list. It is kept smaller than the change itself, and shows only the
+  approved explanation and links to the issues and pull requests on GitHub.
+  See lib/change-provenance.js.
+
+  entries: [{ id, rationale, issues: [{ number, url }], pullRequests: [{ number, url }] }]
+  level: the heading level: 3 under a change, 2 for the section as a whole.
+  heading: "Why this changed" or "Why this section changed".
+#}
+{% macro whyThisChanged(entries, level, heading) %}
+  {%- if entries and entries | length %}
+    <div class="app-why" data-provenance>
+      <h{{ level }} class="govuk-heading-s app-why__heading">{{ heading }}</h{{ level }}>
+      {% for entry in entries %}
+        <div class="app-why__entry" data-provenance-entry="{{ entry.id }}">
+          {% if entry.rationale %}<p class="govuk-body-s app-why__rationale" data-provenance-rationale>{{ entry.rationale }}</p>{% endif %}
+          {% if entry.issues | length %}
+            <p class="govuk-body-s app-why__source">Raised in
+              {%- for issue in entry.issues %}{% if not loop.first %}{{ " and" if loop.last else "," }}{% endif %} <a class="govuk-link" href="{{ issue.url }}" data-provenance-issue="{{ issue.number }}">issue #{{ issue.number }}</a>{% endfor %} on GitHub.</p>
+          {% endif %}
+          {% if entry.pullRequests | length %}
+            <p class="govuk-body-s app-why__source">Reviewed and accepted in
+              {%- for pr in entry.pullRequests %}{% if not loop.first %}{{ " and" if loop.last else "," }}{% endif %} <a class="govuk-link" href="{{ pr.url }}" data-provenance-pull="{{ pr.number }}">pull request #{{ pr.number }}</a>{% endfor %} on GitHub.</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {%- endif %}
+{% endmacro %}

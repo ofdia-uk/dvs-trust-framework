@@ -371,6 +371,40 @@ abbr[title] {
   overflow-wrap: anywhere;
 }
 
+// Why a change was made (lib/change-provenance.js): smaller than the change
+// itself and set off from it by a thin rule, so the framework wording stays
+// the main thing on the page.
+.app-why {
+  margin-top: govuk-spacing(3);
+  margin-bottom: govuk-spacing(4);
+  padding-left: govuk-spacing(3);
+  border-left: 3px solid govuk-functional-colour(border);
+}
+
+.app-why__heading {
+  margin-bottom: govuk-spacing(1);
+}
+
+.app-why__entry + .app-why__entry {
+  margin-top: govuk-spacing(3);
+}
+
+.app-why__entry > p {
+  margin-bottom: govuk-spacing(1);
+}
+
+.app-why__entry > .app-why__rationale {
+  margin-bottom: govuk-spacing(2);
+}
+
+.app-why__entry > :last-child {
+  margin-bottom: 0;
+}
+
+.app-why__source {
+  color: govuk-functional-colour(secondary-text);
+}
+
 // Search (/search/, and the search form on the home page).
 .app-search-form__row {
   display: flex;

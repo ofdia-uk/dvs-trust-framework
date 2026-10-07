@@ -16,6 +16,7 @@ import { buildSearchIndex } from "./lib/search.js";
 import { pageContents, contentsLength } from "./lib/contents.js";
 import { loadRuleIdentities } from "./lib/rule-identities.js";
 import { loadExistingFeedback } from "./lib/existing-feedback.js";
+import { loadChangeProvenance } from "./lib/change-provenance.js";
 import site from "./_data/site.js";
 
 const SITE_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -155,6 +156,15 @@ export default function (eleventyConfig) {
 
   const changes = loadFrameworkChanges();
   eleventyConfig.addGlobalData("frameworkChanges", changes);
+  // Why changes were made, shown on the "What's changed" pages only where a
+  // maintainer has recorded it in change-provenance.json, attached to rules
+  // by their permanent identity. If an entry is wrong, or explains something
+  // that has not changed since the baseline, the build stops and says what
+  // to change. See lib/change-provenance.js.
+  eleventyConfig.addGlobalData("changeProvenance", () => {
+    const root = path.resolve(SITE_DIR, "..");
+    return loadChangeProvenance(root, loadRuleIdentities(root), changes);
+  });
   // A date such as 2026-10-02, written as 2 October 2026.
   eleventyConfig.addFilter("readableDate", (isoDate) =>
     new Date(`${isoDate}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }),

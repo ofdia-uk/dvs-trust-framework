@@ -90,6 +90,16 @@ jobs:
         working-directory: docs-site
         run: npm run --silent feedback
 
+      # Why a change was made is shown on the "What's changed" pages only
+      # where it is recorded in change-provenance.json. Each entry must name
+      # rules by permanent identity, link issues and pull requests by number,
+      # and explain something that has really changed since the baseline.
+      # If not, this step says what to change (see ARCHITECTURE.md, under Why
+      # a change was made).
+      - name: Check why changes were made
+        working-directory: docs-site
+        run: npm run --silent provenance
+
       - name: Test the Markdown rendering
         working-directory: docs-site
         run: npm test
@@ -98,7 +108,7 @@ jobs:
         working-directory: docs-site
         run: npm run build
 
-      - name: Check links, anchors, IDs, headings, rule feedback, permanent rule links, existing feedback links, change status and the draft banner
+      - name: Check links, anchors, IDs, headings, rule feedback, permanent rule links, existing feedback links, change status, why changes were made and the draft banner
         run: python3 tools/check_site.py docs-site/_site --path-prefix "$PATH_PREFIX"
 
       - name: Upload the site for publishing

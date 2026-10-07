@@ -83,7 +83,9 @@ const blockSignature = (block) => renderedSignature(blockRenderer.render(block))
  * the date the framework content last changed on main, or null if it has not
  * changed since the baseline. Each changed section
  * (one per changed file) has its path, status (added, removed, changed or
- * moved), title, site address, a short summary and the changed blocks.
+ * moved), title, site address, a short summary and the changed blocks. Each
+ * block has its kind, its rule number now (rule) and in the baseline
+ * (oldRule), and what changed.
  */
 export function frameworkChanges(root) {
   const baseline = readBaseline(root);
@@ -317,6 +319,10 @@ function compareBlocks(oldSource, newSource, oldPath, newPath) {
     return {
       kind,
       rule,
+      // The number of the rule in the baseline's version of the block, if it
+      // had one. For a changed block it can differ from `rule` when rules
+      // were renumbered. Used to say why a change was made (lib/change-provenance.js).
+      oldRule: oldBlock ? (RULE_NUMBER.exec(oldBlock.trim())?.[1] ?? null) : null,
       // Rule anchors exist on the current page only for rules that are still there.
       anchor: rule && kind !== "removed" ? ruleAnchor(rule) : null,
       label: rule ?? (isHeading(block) ? "Heading" : isListItem(block) ? "List item" : "Paragraph"),

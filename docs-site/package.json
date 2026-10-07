@@ -14,7 +14,8 @@
     "start": "npm run build:css && eleventy --serve",
     "test": "node --test \"test/**/*.test.js\"",
     "rules": "node scripts/rule-identities.js",
-    "feedback": "node scripts/existing-feedback.js"
+    "feedback": "node scripts/existing-feedback.js",
+    "provenance": "node scripts/change-provenance.js"
   },
   "dependencies": {
     "diff": "^8.0.4",

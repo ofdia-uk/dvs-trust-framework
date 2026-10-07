@@ -13,13 +13,17 @@ eleventyComputed:
   paragraph by paragraph, with the changed words marked. See lib/changes.js.
 #}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "components/change-provenance.njk" import whyThisChanged %}
 {% set baseline = frameworkChanges.baseline %}
+{#- Why changes were made, only where a maintainer has recorded it (change-provenance.json). -#}
+{% set why = changeProvenance.bySection[section.path] %}
 {{ govukBreadcrumbs({ items: [{ text: "Home", href: "/" }, { text: "What's changed", href: "/changes/" }], collapseOnMobile: true }) }}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds-from-desktop">
     <span class="govuk-caption-l">Changes since {{ baseline.name }}</span>
     <h1 class="govuk-heading-xl">{{ section.title }}</h1>
     <p class="govuk-body-l" data-section-status="{{ section.status }}">{{ section.summary }}</p>
+    {{ whyThisChanged(why.section if why else [], 2, "Why this section changed") }}
 
     <ul class="govuk-list">
       {% if section.url %}<li><a class="govuk-link" href="{{ section.url }}">Read the current section</a></li>{% endif %}
@@ -31,6 +35,12 @@ eleventyComputed:
         Each change is shown with the wording as it is now. Removed words are <del class="app-del">struck through</del>
         and added words are <ins class="app-ins">underlined</ins>.
       </p>
+      {% if why and why.count %}
+        <p class="govuk-body">
+          Where OfDIA has recorded why a change was made, it is shown under the change,
+          with links to where it was raised and where it was reviewed and accepted on GitHub.
+        </p>
+      {% endif %}
       {% for item in section.items %}
         <div class="app-change">
           <h2 class="govuk-heading-s app-change__title">
@@ -64,6 +74,7 @@ eleventyComputed:
             </ul>
           {% endif %}
           {% if item.kind == "formatting" %}<p class="govuk-body">The formatting changed. The wording and links are the same.</p>{% endif %}
+          {{ whyThisChanged(why.items[loop.index0] if why else [], 3, "Why this changed") }}
         </div>
       {% endfor %}
     {% endif %}

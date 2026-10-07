@@ -1,0 +1,4 @@
+{
+  "about": "Why changes to the trust framework were made, where maintainers have chosen to say so on the reading site's What's changed pages. Each entry names the changed rules by permanent identity (r0254) or section file, the baseline tag the change was made against, the issues that raised it, the pull requests that accepted it and an optional short explanation approved for publication. Nothing is shown unless it is listed here, and nothing is worked out from GitHub. Use npm run provenance in docs-site/. See ARCHITECTURE.md, under Why a change was made.",
+  "changes": []
+}

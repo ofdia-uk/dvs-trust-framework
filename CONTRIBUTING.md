@@ -68,7 +68,7 @@ Do not include personal data in an issue. Issues are public.
 
 Raising an issue does not guarantee a change.
 
-The [What's changed](https://ofdia-uk.github.io/dvs-trust-framework/changes/) page on the reading site shows how the trust framework content in the working draft differs from the published baseline it is compared with. It does not list issues, and not every issue leads to a change there.
+The [What's changed](https://ofdia-uk.github.io/dvs-trust-framework/changes/) page on the reading site shows how the trust framework content in the working draft differs from the published baseline it is compared with. It does not list issues, and not every issue leads to a change there. Where OfDIA has recorded why a change was made, the change links to the issue that raised it and the pull request that accepted it.
 
 ## If you cannot use GitHub
 

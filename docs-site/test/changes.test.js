@@ -132,6 +132,7 @@ test("a changed rule is listed, with its number, a link to its anchor and the ch
   const [item] = section.items;
   assert.equal(item.kind, "changed");
   assert.equal(item.rule, "12.1.a");
+  assert.equal(item.oldRule, "12.1.a", "the rule's number in the baseline");
   assert.equal(item.anchor, "section-12_1_a");
   assert.equal(item.heading, "12.1. Encryption");
   assert.equal(item.parts.filter((part) => part.added).map((part) => part.text.trim()).join(" "), "and in transit");
@@ -146,6 +147,7 @@ test("added and removed rules are listed, and a removed rule has no anchor to li
   const byRule = Object.fromEntries(section.items.filter((item) => item.rule).map((item) => [item.rule, item]));
   assert.ok(byRule["12.1.c"], "the new rule is listed");
   assert.equal(byRule["12.1.c"].anchor, "section-12_1_c");
+  assert.equal(byRule["12.1.c"].oldRule, "12.1.b", "the block it replaced had 12.1.b in the baseline");
   const removedText = section.items.filter((item) => item.kind === "removed" || item.kind === "changed").flatMap((item) => item.parts).filter((p) => p.removed).map((p) => p.text).join(" ");
   assert.match(removedText, /every year/, "the removed list items are shown as removed");
 });

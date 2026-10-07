@@ -54,7 +54,7 @@ The sections are in [`trust-framework-1.0/`](trust-framework-1.0/README.md), one
 
 1. Through a reviewed pull request, make sure `main` holds exactly the text published on GOV.UK.
 2. A maintainer tags that commit `published-X.Y` with an annotated tag, and adds a row to the table above.
-3. If the new version should be the baseline for "What's changed", update [`framework-baseline.json`](framework-baseline.json) in a reviewed pull request.
+3. If the new version should be the baseline for "What's changed", update [`framework-baseline.json`](framework-baseline.json) in a reviewed pull request. The reasons recorded for changes since the old baseline (`change-provenance.json`) are then no longer shown, but are kept as a record. See [Why a change was made](ARCHITECTURE.md#when-the-baseline-moves).
 4. If the banner needs to point to the new publication, update [`tools/caution-banner.md`](tools/caution-banner.md) and apply it. [How this repository works](ARCHITECTURE.md#caution-banner) explains how.
 5. Optionally, create a GitHub release from the tag so the published version is easy to find.
 

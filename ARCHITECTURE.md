@@ -40,6 +40,7 @@ If you cannot tell whether a change alters meaning, treat it as a policy change.
 | `framework-baseline.json` | The tag the reading site's "What's changed" page compares the trust framework with. See [The framework baseline](VERSIONS.md#the-framework-baseline). |
 | `rule-identities.json` | The permanent identity of every rule, for permanent rule links. See [Rule identities](#rule-identities). |
 | `existing-feedback.json` | The issues maintainers have chosen to show on the reading site, next to the rules and sections they are about. See [Existing feedback on the reading site](#existing-feedback-on-the-reading-site). |
+| `change-provenance.json` | Why changes to the trust framework were made, where maintainers have chosen to show it on the "What's changed" pages: the issues, pull requests and an approved explanation. See [Why a change was made](#why-a-change-was-made). |
 
 ## How the text is structured
 
@@ -92,7 +93,7 @@ The **Reading site** workflow also runs on every pull request and every change t
 
 | Check | Confirms | Does not confirm |
 | --- | --- | --- |
-| Build and check the site | Every rule has exactly one permanent identity in `rule-identities.json`, and the registry agrees with the Markdown. Every entry in `existing-feedback.json` is valid and names rules and sections in the working draft. The site builds and its tests pass. Every page has working internal links and anchors, unique IDs, ordered headings, image alt text and the draft banner. Every numbered rule has an anchor and a feedback route, and every permanent rule link goes to its rule or, for a retired rule, to a page that says so. Links to existing feedback go to the right place and give the right count. The "What's changed" page reports a consistent status. Every passage in the search index links to an anchor that exists, the search page offers another way to find a rule until search has started, and the site navigation marks the current page | That the site is published, or anything about the policy content |
+| Build and check the site | Every rule has exactly one permanent identity in `rule-identities.json`, and the registry agrees with the Markdown. Every entry in `existing-feedback.json` is valid and names rules and sections in the working draft. Every entry in `change-provenance.json` is valid and, for the current baseline, explains a rule or section that has changed since it. The site builds and its tests pass. Every page has working internal links and anchors, unique IDs, ordered headings, image alt text and the draft banner. Every numbered rule has an anchor and a feedback route, and every permanent rule link goes to its rule or, for a retired rule, to a page that says so. Links to existing feedback go to the right place and give the right count. The "What's changed" page reports a consistent status, and shows exactly the recorded reasons for changes. Every passage in the search index links to an anchor that exists, the search page offers another way to find a rule until search has started, and the site navigation marks the current page | That the site is published, or anything about the policy content |
 
 On a pull request, GitHub runs the workflows and tools as changed by that pull request. A passing check therefore does not show that the checks themselves were left intact. Review changes to `.github/` and `tools/` with that in mind.
 
@@ -104,7 +105,7 @@ Besides the text itself, the site generates four things when it is built:
 
 - **Rule-level feedback, links and references.** Readers can give feedback on a specific rule by pointing to or tapping it, or with the rule picker at the bottom of the page, which can be filtered by rule number or heading. Either way, an issue form opens with the rule number and a link to the rule filled in. The page-level "Give feedback on GitHub" link remains the general route, and the "Draft" banner at the top of every page offers the same route ("give feedback on this draft") without scrolling. The same places offer "Copy link", which copies the rule's permanent link, and "Copy reference" (for example `Rule 12.4.1.c`). A link to a rule highlights the whole rule. See [Rule identities](#rule-identities).
 - **Search (`/search/`).** Readers can search for words, or type a rule or section number such as 12.4.1.c to go straight to it. The search index is made from the trust framework Markdown, so it never needs updating by hand. Search needs JavaScript; if it cannot run, the page explains how to find a rule and links to every section.
-- **"What's changed" (`/changes/`).** The page compares the working draft with the configured baseline and shows any changes to the trust framework content. See [Trust framework changes and repository history](#trust-framework-changes-and-repository-history).
+- **"What's changed" (`/changes/`).** The page compares the working draft with the configured baseline and shows any changes to the trust framework content. Where a maintainer has recorded why a change was made, it says so under the change. See [Trust framework changes and repository history](#trust-framework-changes-and-repository-history) and [Why a change was made](#why-a-change-was-made).
 - **Existing feedback (`/existing-feedback/`).** Issues that maintainers have chosen to show, listed by section and rule, with links from those rules and sections. See [Existing feedback on the reading site](#existing-feedback-on-the-reading-site).
 
 ## Rule identities
@@ -338,6 +339,138 @@ To compare, the site build needs the baseline tag and the full Git history, whic
 - the history is incomplete.
 
 A fork needs the baseline tag too. Forks do not receive new tags automatically, so after the baseline moves, fetch the tag into the fork.
+
+## Why a change was made
+
+The "What's changed" pages show *what* differs between the working draft and the baseline. Where a maintainer has recorded it, a change can also say *why*: a short explanation, if one has been approved, and links to the issues where it was raised and the pull requests where it was reviewed and accepted.
+
+Recording this is optional and deliberate. Nothing is worked out from commit messages, pull request descriptions, linked issues or discussion on GitHub. The site shows only what is recorded in [`change-provenance.json`](change-provenance.json), which changes only through a reviewed pull request. A change with no entry shows nothing.
+
+An entry records why a *change* was made: a change to a rule or section since the baseline. It is not a place for general comments about a rule. For feedback about a rule, see [Existing feedback on the reading site](#existing-feedback-on-the-reading-site).
+
+### What readers see
+
+On the section's "What's changed" page, under the change, readers see:
+
+> **Why this changed**
+> Makes clear that fraud audits are needed every six months.
+> Raised in issue #123 on GitHub.
+> Reviewed and accepted in pull request #147 on GitHub.
+
+An entry about a section as a whole is shown under the page's summary, as "Why this section changed". It is set in smaller text than the change, so the framework wording stays the main thing on the page. Each number links to the issue or pull request on GitHub. Nothing else is copied from GitHub to the site: not the issue's title, text, comments or labels.
+
+### What is public where
+
+| Where | What is there |
+| --- | --- |
+| The reading site | Only the entries in `change-provenance.json` for the current baseline: the approved explanation, and links to the issues and pull requests it names. |
+| GitHub | Everything: every issue and pull request with its discussion, the commit history, and `change-provenance.json` itself with its history, including entries that are no longer shown. |
+
+An issue or pull request being public on GitHub, or being linked from a commit or another pull request, never puts it on the site.
+
+### Recording why a change was made
+
+Record it in the pull request that makes the change, once its number is known: open the pull request as a draft first. You can also record it in a later pull request after the change has merged. Record the rule identity decisions first (see [Rule identities](#rule-identities)), because entries name rules by their identity.
+
+**On your own computer,** run, in `docs-site/`:
+
+```sh
+npm run provenance -- record --rules 12.4.1.c --issues 123 --pr 147 --rationale "Makes clear that fraud audits are needed every six months."
+```
+
+| Option | Give |
+| --- | --- |
+| `--rules` | The rules whose change it explains. Use their number as you read it on the site now, such as `12.4.1.c`, or their permanent identity, such as `r0254`. For a removed rule, use the number it last had, or its identity. |
+| `--sections` | The sections whose change it explains as a whole, by number (`12`) or file. Use this for a change that is not to a numbered rule, such as a heading, an introductory paragraph or a table, or for a section file that was added, removed or moved. |
+| `--issues` | The issues that raised the change, as `123`, `#123` or the issue's address. |
+| `--pr` | The pull requests that reviewed and accepted it, in the same forms. |
+| `--rationale` | Optional. A short explanation for readers, on one line, of at most 400 characters, approved for publication. It is shown exactly as written, as plain text: Markdown and HTML are not formatted. Leave it out if the links say enough. |
+
+An entry needs `--rules` or `--sections`, and at least one of `--issues`, `--pr` and `--rationale`.
+
+The command:
+
+- records the entry against the current baseline;
+- gives it the next id, such as `c0001`;
+- records rules by their permanent identity;
+- refuses anything that would fail the checks below.
+
+Commit `change-provenance.json`, and review it like any other change. Check in particular the explanation readers will see, and that each number is the right issue or pull request.
+
+**In GitHub, in the browser,** edit `change-provenance.json` on the pull request's branch and add a line, as below. The checks on the pull request say if anything is wrong.
+
+**The file** has one entry per line:
+
+```json
+{"id":"c0001","baseline":"published-1.0","rules":["r0254"],"issues":[123],"pullRequests":[147],"rationale":"Makes clear that fraud audits are needed every six months."}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `id` | `c` and at least four digits, unique in the file. Use the next number. |
+| `baseline` | The baseline the change was made against: the `tag` in [`framework-baseline.json`](framework-baseline.json), currently `published-1.0`. |
+| `rules` | The permanent identities of the rules whose change it explains, such as `r0254`, never their numbers. "Copy link" on a rule gives its permanent link, `/rules/r0254/`, which contains the identity. A removed rule's identity is on its permanent page. |
+| `sections` | Section files whose change it explains as a whole, such as `trust-framework-1.0/part-3/12-service-requirements.md`. |
+| `issues`, `pullRequests` | Issue and pull request numbers, as plain numbers: `[123, 130]`, not `"#123"` and not addresses. |
+| `rationale` | Optional. The approved explanation, as above. |
+
+**Which entries to make:**
+
+- **Several issues led to one change:** list them all in one entry.
+- **One issue led to changes to several rules:** list the rules in one entry. If they need different explanations, make one entry for each.
+- **A rule was changed by several pull requests since the baseline:** make one entry for each pull request. The page shows the whole change since the baseline, so it shows them all, in the order of the file (oldest first).
+
+### When rules are renumbered or moved
+
+Entries name rules by their permanent identity. When a rule is renumbered or moved, and that is recorded in `rule-identities.json`, its entry needs no change. The entry follows the rule: it is shown under the rule's new number. For a rule moved to another section, it is shown on both sections' pages, where it was removed and where it was added.
+
+If a number has been used for more than one rule, the site may not be able to tell which rule a passage removed from that number belonged to. Rather than guess, it then shows nothing for that passage. If that leaves an entry shown nowhere, the check fails. List the section in `sections` instead.
+
+### When a later change replaces an earlier one
+
+If a rule is changed again by a later pull request, add an entry for the later change. Both are shown.
+
+If the later change makes the earlier explanation wrong, update or remove the earlier entry in the same pull request. For example, if the earlier wording has been replaced entirely:
+
+- to remove the rule from the earlier entry, run `npm run provenance -- record c0001 --rules` with the rules it still explains;
+- or remove the whole entry.
+
+If a change is undone, so that a rule is back to its baseline wording, the check fails until the rule is removed from its entries.
+
+### When the baseline moves
+
+Entries belong to the baseline they were made against. When [`framework-baseline.json`](framework-baseline.json) names a new baseline, the "What's changed" pages compare the working draft with it, and entries for the old baseline are no longer shown. They stay in the file as a record. They are no longer checked against the comparison, but their baseline tag must still exist. New entries are recorded against the new baseline.
+
+### Correcting or withdrawing an entry
+
+- **To correct an entry,** run `npm run provenance -- record c0003` with only what changes, such as `--rationale "A corrected explanation."` or `--issues 123 130`. Everything else is kept. `--rationale ""` removes the explanation.
+- **To stop showing an entry,** run `npm run provenance -- remove c0003`.
+- **To stop showing one issue or pull request but keep the rest,** record the entry again with the list it should keep.
+
+You can also edit or delete the entry's line by hand. Once the pull request is merged, the site changes.
+
+Issues and pull requests on GitHub are not changed by any of this. They stay public, with their discussion, whatever the site shows. The history of `change-provenance.json` records what was shown, and when.
+
+### Checks
+
+The Reading site workflow runs `npm run provenance` (in `docs-site/`), and the build runs the same check. It needs the baseline tag and the full Git history, as "What's changed" does. It fails, saying what to change, if `change-provenance.json`:
+
+- cannot be read, or has unexpected fields;
+- has an `id` that is missing, malformed or used twice;
+- has no `baseline`, or, for an earlier baseline, names a tag that does not exist;
+- has an entry that does not say what changed (no rules or sections) or why (no issues, pull requests or explanation);
+- gives a rule number instead of an identity (it names the identity to use), or names an identity that does not exist;
+- gives an issue or pull request as anything but a plain number (for `"#123"` or an address, it says the number to write);
+- gives the same number as both an issue and a pull request;
+- has an explanation that is empty, on more than one line or too long;
+- names a rule or section that has not changed since the current baseline. This includes a change that has been undone, and a rule whose only change is that its section file moved: list the section instead;
+- explains the same rule or section twice with the same pull request, or, without a pull request, with the same issue.
+
+The checks cannot tell whether #123 really is the issue that raised the change, whether #147 was merged, or whether the explanation is accurate and approved. Reviewers check these.
+
+When the check fails, nothing is published, and the live site keeps its last version. The site check also confirms that the notes appear only on "What's changed" pages, and that each entry for the current baseline is shown with exactly its explanation, issues and pull requests, as text. Each issue and pull request link must go to that issue or pull request on GitHub.
+
+The command exits with status 0 if the register is in order, 1 if it has problems, and 2 if it refused a change, or could not read the register, the rule identities or the comparison with the baseline. When it refuses, it changes nothing.
 
 ## Issue labels
 
