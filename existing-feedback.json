@@ -1,4 +1,6 @@
 {
   "about": "GitHub issues that maintainers have chosen to link from the reading site, next to the rules and sections they are about. An issue is shown only if it is listed here: being public on GitHub is not enough. Listing an issue does not mean OfDIA agrees with it. To add or remove an issue, use the Show existing feedback workflow or npm run feedback, which record rules by their permanent identity (r0254). See ARCHITECTURE.md, under Existing feedback on the reading site.",
-  "feedback": []
+  "feedback": [
+    {"issue":34,"title":"Revise flowdown terms to make applicable to all types of providers","rules":["r0321"],"sections":["trust-framework-1.0/part-3/12-service-requirements.md"]}
+  ]
 }
