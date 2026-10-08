@@ -15,7 +15,7 @@
 
 #### 12.1.1. Data schema
 
-12.1.1.a. The [trust framework data schema](https://www.gov.uk/government/publications/uk-digital-verification-services-trust-framework-data-schema-1-0) provides guidance for services and relying parties on how to organise and exchange information in a consistent way to enable interoperability.
+12.1.1.a. The [trust framework data schema](https://www.gov.uk/government/publications/uk-digital-verification-services-trust-framework-data-schema-1-0) provides guidance for services and relying parties on how to organise and exchange information in a consistent way to enable interoperability. Check out the GitHub repo here.
 
 12.1.1.b. You could use the data schema to help ensure your service is interoperable with other certified services and relying parties. It is recommended that the data schema is followed across the market to encourage interoperability between organisations, in the UK and internationally.
 
