@@ -23,17 +23,17 @@
 
 <a id="section-5_2"></a>
 
-### 5.2. Accepting expired documents
+### 5.2. Accepting expired evidence
 
-5.2.a. You must not use expired documents if you know in-date documents are available which can be used to achieve the intended outcome (e.g., to meet a certain level of confidence or fulfil a regulatory need).
+5.2.a. You must not use expired evidence if you know in-date evidence is available which can be used to achieve the intended outcome (e.g., to meet a certain level of confidence or fulfil a regulatory need).
 
-5.2.b. There is no obligation to accept expired documents, but if you do choose to accept them, you must:
+5.2.b. There is no obligation to accept expired evidence, but if you do choose to accept them, you must:
 
 - demonstrate consideration of any legislation or guidance that may be relevant to a specific sector or use case; and
 
 - only accept passports up to a maximum of 12 months after they have expired.
 
-5.2.c. You could apply additional restrictions to your acceptance of expired documents. For example, you may choose to only accept expired passports with near-field communication (NFC) chips issued by specific authorities, or for a maximum of 6 months. You could decide to set restrictions yourself, or they could be agreed with other organisations you work with, such as a relying party.
+5.2.c. You could apply additional restrictions to your acceptance of expired evidence. For example, you may choose to only accept expired passports with near-field communication (NFC) chips issued by specific authorities, or for a maximum of 6 months. You could decide to set restrictions yourself, or they could be agreed with other organisations you work with, such as a relying party.
 
 ---
 
